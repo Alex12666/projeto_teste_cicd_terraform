@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  # Nome do seu serviço de frontend
+  frontend-app:
+    build:
+      context: ./frontent  # Caminho para a pasta que tem seu Dockerfile
+      dockerfile: Dockerfile
+    container_name: devalexandre-container
+    ports:
+      - "80:80"  # Mapeia a porta 80 da EC2 para a porta 80 do container
+    restart: always
+    

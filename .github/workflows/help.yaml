@@ -1,0 +1,55 @@
+name: Deploy Full Stack
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Código
+        uses: actions/checkout@v4
+
+      # ESTE PASSO É OBRIGATÓRIO: Instala o Terraform no GitHub
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configurar AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-2
+
+      # 1. Levanta a Infraestrutura
+      - name: Terraform Apply
+        run: |
+          cd terraform
+          terraform init
+          terraform apply -auto-approve
+
+      # 2. Build e Push da Imagem Docker para o ECR
+      - name: Login no ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and Push
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: my_images
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest ./frontent
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
+      # 3. Deploy na EC2 via SSH
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin ${{ steps.login-ecr.outputs.registry }}
+            docker-compose pull
+            docker-compose up -d
