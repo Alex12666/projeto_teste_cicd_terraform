@@ -1,5 +1,5 @@
 Projeto: Pipeline CI/CD com Terraform e AWS
-Breve descrição: "Este projeto automatiza o provisionamento de infraestrutura na AWS (VPC, EC2, S3) e realiza o deploy contínuo de uma aplicação via GitHub Actions."
+"Este projeto automatiza o provisionamento de infraestrutura na AWS (VPC, EC2, S3) e realiza o deploy contínuo de uma aplicação via GitHub Actions."
 
 🛠️ Tecnologias Utilizadas
 Terraform: Infraestrutura como Código (IaC).
@@ -33,7 +33,6 @@ Deploy da Infra:
 Bash
 terraform apply -auto-approve
 🧠 Desafios Superados (O que eu aprendi)
-Essa parte é a que os recrutadores mais gostam:
 
 Gerenciamento de Estado: Lidando com errored.tfstate e sincronismo de estado do Terraform.
 
